@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      #f2 { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      #f1 { margin-top:30vh;text-align:center; }
+      #m { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      #b { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #mensajes { list-style-type: none; margin: 0; padding: 0; }
+      #mensajes li { padding: 5px 10px; }
+      #mensajes li:nth-child(odd) { background: #eee; }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function(){
+            var ready = false;
+            var usuario = $("#usuario").val().trim();
+
+            $("#contenedor-global").hide();
+            $("#usuario").focus();
+
+            if(usuario.length < 4){
+                $("#f1").on( 'submit', function(e){
+                    socket.emit('join', usuario);
+                    $("#formulario").hide();
+                    $("#contenedor-global").show();
+                    e.preventDefault();
+                    ready = true;
+                });
+            }else{
+                alert("Debes introducir un nombre de usuario antes de poder entrar.");
+            }
+
+            var socket = io();
+            $('#f2').submit(function(){
+                var msg = $("#m").val();
+                socket.emit("send", msg);
+                $('#m').val('');
+                return false;
+            });
+
+            
+            socket.on('chat', function(who,msg){
+                if(ready){
+                    $("#mensajes").append($('<li>').text(who+": "+msg));
+                }
+            });
+        });
+    </script>
+  </head>
+  <body>
+    <div id="formulario">
+        <form action="" id="f1">
+            <input type="text" id="usuario" placeholder="Introduce usuario" size="40" maxlength="10">
+            <button type="submit">Entrar al chat</button>
+        </form>
+    </div>
+    <div id="contenedor-global">
+        <ul id="mensajes"></ul>
+        <form action="" id="f2">
+        <input id="m" autocomplete="off" /><button id="b">Enviar</button>
+        </form>
+    </div>
+  </body>
+</html>
