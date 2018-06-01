@@ -8,10 +8,15 @@ app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
 
-//conectar y desconectar usuarios en consola
 socket.on('connection', function(client){
     client.on("join", function(name){
         people[client.id] = name;
+    });
+
+    client.on("update", function(name){
+    	client.emit("update", "You have connected to the server.");
+		socket.sockets.emit("update", name + " has joined the server.");
+		socket.sockets.emit("update-people", people);
     });
 
     client.on("send", function(msg){

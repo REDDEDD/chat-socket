@@ -44,7 +44,7 @@
 		socket.on("update", function(msg) {
 			if(ready)
 				$("#msgs").append(" " + msg + " ");
-		})
+		});
 		
 		socket.on("update-people", function(people){
 			if(ready) {

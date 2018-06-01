@@ -18,44 +18,64 @@
     <script>
         $(document).ready(function(){
             var ready = false;
-            var usuario = $("#usuario").val().trim();
 
             $("#contenedor-global").hide();
             $("#usuario").focus();
 
-            if(usuario.length < 4){
-                $("#f1").on( 'submit', function(e){
-                    socket.emit('join', usuario);
-                    $("#formulario").hide();
-                    $("#contenedor-global").show();
-                    e.preventDefault();
-                    ready = true;
-                });
-            }else{
+            $("#f1").on( 'submit', function(e){
+            var usuario = $("#usuario").val().trim();
+              if(usuario.length > 4){
+                socket.emit('join', usuario);
+                $("#formulario").hide();
+                $("#contenedor-global").show();
+                e.preventDefault();
+                socket.emit("update", usuario);
+                $("#m").focus();
+                ready = true;
+              }else{
                 alert("Debes introducir un nombre de usuario antes de poder entrar.");
-            }
+              }
+            });
+            
 
             var socket = io();
             $('#f2').submit(function(){
-                var msg = $("#m").val();
-                socket.emit("send", msg);
-                $('#m').val('');
+                var msg = $("#m").val().trim();
+                if(msg != ""){
+                  socket.emit("send", msg);
+                  $('#m').val('');
+                }
                 return false;
             });
 
             
             socket.on('chat', function(who,msg){
-                if(ready){
-                    $("#mensajes").append($('<li>').text(who+": "+msg));
-                }
+              if(ready){
+                $("#mensajes").append($('<li>').text(who+": "+msg));
+              }
             });
-        });
+
+            socket.on("update", function(msg) {
+              if(ready){
+                $("#mensajes").append($('<li>').text(msg));
+              }
+            });
+
+            socket.on("update-people", function(people){
+              if(ready) {
+                $("#people").empty();
+                $.each(people, function(clientid, name) {
+                  $('#people').append($('<li>').text(name));
+                });
+              }
+            });
+          });
     </script>
   </head>
   <body>
     <div id="formulario">
         <form action="" id="f1">
-            <input type="text" id="usuario" placeholder="Introduce usuario" size="40" maxlength="10">
+            <input type="text" id="usuario" name="usuario" placeholder="Introduce usuario" size="40" maxlength="10">
             <button type="submit">Entrar al chat</button>
         </form>
     </div>
